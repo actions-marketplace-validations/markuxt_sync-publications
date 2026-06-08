@@ -28,11 +28,12 @@ export function parseYamlFrontmatter(content: string): Record<string, unknown> {
  * We delegate to `yaml.stringify` of a single value so we always get correct
  * quoting, including for strings containing `:`, leading/trailing whitespace,
  * CJK characters, etc.
+ *
+ * Empty string is special-cased to return '' so callers writing
+ * `field: ${yamlStr(value)}` produce a clean `field: ` instead of `field: ""`.
  */
 export function yamlStr(value: string): string {
-  // yaml.stringify with an explicit Document boundary returns a clean scalar
-  // (no trailing newline). We use a single-value document so block styles
-  // aren't triggered.
+  if (value === '') return ''
   const doc = yamlStringify(value, { defaultStringType: 'PLAIN' })
   return doc.replace(/\n$/, '')
 }

@@ -17,6 +17,8 @@ export function reconstructAbstract(invertedIndex: Record<string, number[]> | nu
     }
   }
 
+  if (entries.length === 0) return null
+
   // Sort by position
   entries.sort((a, b) => a[1] - b[1])
 

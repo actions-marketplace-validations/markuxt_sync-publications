@@ -14,6 +14,8 @@ export function reconstructAbstract(invertedIndex) {
             entries.push([word, pos]);
         }
     }
+    if (entries.length === 0)
+        return null;
     // Sort by position
     entries.sort((a, b) => a[1] - b[1]);
     // Join words in order

@@ -20,6 +20,9 @@ export declare function parseYamlFrontmatter(content: string): Record<string, un
  * We delegate to `yaml.stringify` of a single value so we always get correct
  * quoting, including for strings containing `:`, leading/trailing whitespace,
  * CJK characters, etc.
+ *
+ * Empty string is special-cased to return '' so callers writing
+ * `field: ${yamlStr(value)}` produce a clean `field: ` instead of `field: ""`.
  */
 export declare function yamlStr(value: string): string;
 /**
