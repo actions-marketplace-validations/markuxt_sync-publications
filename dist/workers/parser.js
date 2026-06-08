@@ -28,16 +28,40 @@ export function parseWork(work) {
     const year = typeof work.publication_year === 'number' ? work.publication_year : null;
     if (!year)
         return null;
-    // Extract authors
+    // Extract authors + ORCIDs in parallel, deduping along the way.
+    //
+    // OpenAlex expands authorships per (author × institution), so the same
+    // person shows up once per affiliation. Sometimes an author entry has
+    // ORCID and a parallel entry for the same person does not — so we track
+    // BOTH the ORCID and the lower-cased name as keys, and a new entry is a
+    // duplicate if it matches either one. First occurrence wins so the
+    // output order matches the input.
+    //
+    // Side effect: two genuinely-different "John Smith"s without ORCID will
+    // collapse. That's acceptable because (a) OpenAlex normally disambiguates
+    // with ORCID, and (b) showing the same name twice in the byline is
+    // almost always wrong.
     const authorships = Array.isArray(work.authorships) ? work.authorships : [];
-    const authors = authorships
-        .map(a => {
-        const name = a.author?.display_name;
-        return name ? formatAuthorName(name) : null;
-    })
-        .filter((n) => n !== null);
-    // Extract author ORCIDs (parallel to authors, includes nulls to preserve order)
-    const authorsOrcid = authorships.map(a => extractOrcidId(a.author?.orcid));
+    const authors = [];
+    const authorsOrcid = [];
+    const seen = new Set();
+    for (const a of authorships) {
+        const displayName = a.author?.display_name;
+        if (!displayName)
+            continue;
+        const name = formatAuthorName(displayName);
+        const orcid = extractOrcidId(a.author?.orcid);
+        const nameKey = name.toLowerCase();
+        // Match if either key was seen before.
+        if ((orcid && seen.has(orcid)) || seen.has(nameKey))
+            continue;
+        // Track both so future occurrences catch on whichever they expose.
+        if (orcid)
+            seen.add(orcid);
+        seen.add(nameKey);
+        authors.push(name);
+        authorsOrcid.push(orcid);
+    }
     // Extract DOI — canonical https://doi.org/ form
     const doi = doiToUrl(work.doi);
     // Extract venue
