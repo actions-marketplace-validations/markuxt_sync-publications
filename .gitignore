@@ -94,6 +94,9 @@ out
 # NOTE: dist/ is intentionally tracked for the GitHub Action runtime.
 # node20 in actions runs against dist/index.js (see action.yml).
 
+# Local test output (default CONTENT_DIR from .env.development).
+.local-test/
+
 # Gatsby files
 .cache/
 # Comment in the public line in if your project uses Gatsby and not Next.js
