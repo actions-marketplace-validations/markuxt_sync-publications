@@ -173,32 +173,32 @@ describe('integration: full sync pipeline (mocked network)', () => {
     // (Skipping processPdf since we don't want to depend on network / poppler
     // in unit tests. PDF pipeline has its own test file.)
     pub2.abstractPage = 1
-    pub2.abstractScreenshot = 'publications/2024/W123.png'
+    pub2.abstractScreenshot = 'publications/2024/a-novel-approach-to-robotics.png'
 
-    // Write file (flat layout: <year>/<id>.md)
+    // Write file (flat layout: <year>/<slug>.md)
     const outDir = join(root, 'publications', '2024')
     mkdirSync(outDir, { recursive: true })
-    writeFileSync(join(outDir, 'W123.md'), buildMarkdown(pub2), 'utf-8')
+    writeFileSync(join(outDir, 'a-novel-approach-to-robotics.md'), buildMarkdown(pub2), 'utf-8')
 
     // Assert on the output markdown
-    const written = readFileSync(join(outDir, 'W123.md'), 'utf-8')
+    const written = readFileSync(join(outDir, 'a-novel-approach-to-robotics.md'), 'utf-8')
     expect(written).toContain('title: A Novel Approach to Robotics')
     expect(written).toContain('openalex_id: W123')
     expect(written).toContain('doi: https://doi.org/10.1000/foo')
     expect(written).toContain('pdf_url: https://example.com/paper.pdf')
     expect(written).toContain('abstract_page: 1')
-    expect(written).toContain('abstract_screenshot: publications/2024/W123.png')
+    expect(written).toContain('abstract_screenshot: publications/2024/a-novel-approach-to-robotics.png')
     expect(written).toContain('A novel approach')
   })
 
   it('does not duplicate publications already in the content dir', async () => {
     setupContent([{ name: 'Alice', orcid: '0000-0001-2345-6789' }])
 
-    // Pre-populate an existing publication (flat layout: <year>/<id>.md)
+    // Pre-populate an existing publication (flat layout: <year>/<slug>.md)
     const exDir = join(root, 'publications', '2024')
     mkdirSync(exDir, { recursive: true })
     writeFileSync(
-      join(exDir, 'W123.md'),
+      join(exDir, 'existing.md'),
       '---\n_hidden: false\ntitle: Existing\nyear: 2024\nopenalex_id: W123\n---\n'
     )
 
@@ -275,10 +275,10 @@ describe('integration: full sync pipeline (mocked network)', () => {
     expect(pub.openalexId).toBe('W999')
     expect(pub.title).toBe('End-to-End Test')
 
-    // existsSync sanity check: writing produces the expected file
+    // existsync sanity check: writing produces the expected file (slug-based)
     const outDir = join(root, 'publications', '2024')
     mkdirSync(outDir, { recursive: true })
-    writeFileSync(join(outDir, 'W999.md'), buildMarkdown(pub), 'utf-8')
-    expect(existsSync(join(outDir, 'W999.md'))).toBe(true)
+    writeFileSync(join(outDir, 'end-to-end-test.md'), buildMarkdown(pub), 'utf-8')
+    expect(existsSync(join(outDir, 'end-to-end-test.md'))).toBe(true)
   })
 })

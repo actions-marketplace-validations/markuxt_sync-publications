@@ -29,6 +29,7 @@ import { yamlStr } from './utils/yaml.js'
 import { initGitHubOutput, setOutput } from './utils/github.js'
 import { normalizeDoi } from './utils/doi.js'
 import { processPdf } from './utils/pdf.js'
+import { pickFilenameStem } from './utils/slugify.js'
 
 // API imports
 import {
@@ -181,21 +182,36 @@ async function main() {
   // 7. Write markdown files
   //
   // Layout (flat per year, no per-paper subdirectory):
-  //   <content_dir>/publications/<year>/<openalex_id>.md
-  //   <content_dir>/publications/<year>/<openalex_id>.png   (when OA PDF screenshot rendered)
+  //   <content_dir>/publications/<year>/<title-slug>.md
+  //   <content_dir>/publications/<year>/<title-slug>.png   (when OA PDF screenshot rendered)
+  //
+  // The slug is derived from the paper title via slugify(); empty / colliding
+  // titles fall back to the OpenAlex ID (see src/utils/slugify.ts).
   const newFiles: string[] = []
+  const usedStemsByYear = new Map<string, Set<string>>()
 
   for (const pub of toWrite) {
-    const yearDir = join(PUBLICATIONS_DIR, String(pub.year))
+    const yearKey = String(pub.year)
+    const yearDir = join(PUBLICATIONS_DIR, yearKey)
     if (!existsSync(yearDir)) mkdirSync(yearDir, { recursive: true })
+
+    // Track used filename stems per-year so within-batch collisions are
+    // resolved deterministically (first occurrence keeps the bare slug).
+    let used = usedStemsByYear.get(yearKey)
+    if (!used) {
+      used = new Set<string>()
+      usedStemsByYear.set(yearKey, used)
+    }
+    const stem = pickFilenameStem(pub.title, pub.openalexId, used)
+    used.add(stem)
 
     // 7a. PDF: download, locate abstract page, render screenshot.
     //     Failures are graceful — we still emit the markdown with whatever
     //     metadata we have. We only run this for OA papers with a PDF URL.
     if (pub.pdfUrl && !pub.hidden) {
       try {
-        const relativeYearDir = join(CONTENT_DIR, 'publications', String(pub.year))
-        const result = await processPdf(pub, yearDir, relativeYearDir, pub.openalexId)
+        const relativeYearDir = join(CONTENT_DIR, 'publications', yearKey)
+        const result = await processPdf(pub, yearDir, relativeYearDir, stem)
         pub.pdfUrl = result.pdfUrl
         pub.abstractPage = result.abstractPage
         pub.abstractScreenshot = result.screenshotPath
@@ -211,7 +227,7 @@ async function main() {
       }
     }
 
-    const filePath = join(yearDir, `${pub.openalexId}.md`)
+    const filePath = join(yearDir, `${stem}.md`)
     writeFileSync(filePath, buildMarkdown(pub), 'utf-8')
     console.log(`  [${pub.hidden ? 'hidden' : 'visible'}] ${filePath}`)
     newFiles.push(filePath)

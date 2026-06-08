@@ -104,11 +104,15 @@ orcid: 0000-0001-2345-6789
 生成的论文文件写到（**扁平结构**，每篇论文一个 .md，无子目录）：
 
 ```
-<content_dir>/publications/<year>/<openalex_id>.md
-<content_dir>/publications/<year>/<openalex_id>.png   （处理了 OA PDF 时才有）
+<content_dir>/publications/<year>/<title-slug>.md
+<content_dir>/publications/<year>/<title-slug>.png   （处理了 OA PDF 时才有）
 ```
 
-每篇 `<openalex_id>.md` 长这样：
+文件名是论文标题的扁平化（lowercase / 空白和标点 → `-` / CJK 保留 /
+长度 cap 80 字符），空标题回退到 OpenAlex ID，同年目录内重名时追加
+`-<shortId>` 后缀。详见 `src/utils/slugify.ts`。
+
+每篇 `<title-slug>.md` 长这样：
 
 ```yaml
 ---
@@ -125,7 +129,7 @@ openalex_id: W123456789
 venue: Conference Name 2024
 pdf_url: https://example.com/paper.pdf
 abstract_page: 1
-abstract_screenshot: src/publications/2024/W123456789.png
+abstract_screenshot: src/publications/2024/publication-title.png
 keywords:
   - control systems
   - robotics
