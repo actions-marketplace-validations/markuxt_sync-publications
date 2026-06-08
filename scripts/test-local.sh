@@ -7,10 +7,14 @@
 # `pnpm dev` (tsx) — no build step required.
 #
 # Usage:
-#   ./test-local.sh
-#   ./test-local.sh --build    # run dist/index.js instead (compiled output)
+#   ./scripts/test-local.sh
+#   ./scripts/test-local.sh --build    # run dist/index.js instead (compiled output)
 
 set -e
+
+# Always run from the repo root so relative paths (.env.development, dist/)
+# resolve correctly regardless of where this script is invoked from.
+cd "$(dirname "$0")/.."
 
 echo "🚀 Sync Publications from OpenAlex — Local Test"
 echo "================================================"

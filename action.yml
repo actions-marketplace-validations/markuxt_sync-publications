@@ -32,5 +32,5 @@ outputs:
     description: 'List of new publication file paths'
 
 runs:
-  using: 'node20'
-  main: 'dist/index.js'
+  using: 'node24'
+  main: 'dist/index.cjs'

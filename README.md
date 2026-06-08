@@ -42,8 +42,8 @@ cp .env.example .env.development
 # 编辑 .env.development — 填入 ROR_ID 和 CONTACT_EMAIL
 pnpm dev          # 通过 tsx 运行（无需 build）
 # 或：
-./test-local.sh           # 推荐 —— 等价于 pnpm dev
-./test-local.sh --build   # 跑编译后的 dist/index.js
+./scripts/test-local.sh           # 推荐 —— 等价于 pnpm dev
+./scripts/test-local.sh --build   # 跑编译后的 dist/index.cjs
 ```
 
 也可以在命令行临时覆盖任何环境变量：
@@ -194,7 +194,7 @@ sync-publications/
 │       └── deduplicator.ts   # 过滤 + 去重 pending 列表
 ├── tests/                    # vitest 测试套件（140 个测试）
 ├── action.yml                # GitHub Action 元数据
-├── dist/                     # node20 运行时加载的编译产物
+├── dist/                     # node24 运行时加载的编译产物
 └── package.json
 ```
 
@@ -202,7 +202,7 @@ sync-publications/
 
 ### 前置要求
 
-- Node.js ≥ 20.0.0
+- Node.js ≥ 24.0.0
 - pnpm（推荐）或 npm
 - （可选，本地需要截图时）`poppler`：`brew install poppler`
 
@@ -211,19 +211,19 @@ sync-publications/
 ```bash
 pnpm install             # 安装依赖
 pnpm dev                 # 通过 tsx 运行（无需 build）
-pnpm build               # 编译 src/ → dist/
-pnpm start               # 跑编译后的 dist/index.js
+pnpm build               # 打包成单个自包含的 dist/index.cjs（esbuild，含全部依赖）
+pnpm start               # 跑编译后的 dist/index.cjs
 pnpm test                # 跑 vitest 测试套件
 pnpm test:watch          # 交互式 watch 模式
 pnpm test:coverage       # vitest + v8 覆盖率
-./test-local.sh          # 等价于 pnpm dev，自动加载 .env.development
-./test-local.sh --build  # 同上，但跑的是 dist/index.js
+./scripts/test-local.sh          # 等价于 pnpm dev，自动加载 .env.development
+./scripts/test-local.sh --build  # 同上，但跑的是 dist/index.cjs
 ```
 
 ### 环境变量文件
 
 - `.env.example` —— 提交到仓库的模板，列出所有变量。
-- `.env.development` —— gitignored；`pnpm dev` 和 `./test-local.sh`
+- `.env.development` —— gitignored；`pnpm dev` 和 `./scripts/test-local.sh`
   自动加载这个文件。
 - `.env` —— 也支持（优先级低于 `.env.development`）。
 
@@ -232,9 +232,11 @@ pnpm test:coverage       # vitest + v8 覆盖率
 
 ### 构建与发布
 
-`dist/` 是有意提交到仓库的。GitHub Actions 的 node20 运行时直接加载
-`dist/index.js`（见 `action.yml`），所以任何改动 `src/` 的 PR 在
-合并前都必须重新构建 `dist/`。
+`dist/` 是有意提交到仓库的。`pnpm build` 用 [esbuild](https://esbuild.github.io)
+把 `src/index.ts` 连同所有依赖（`dotenv` / `glob` / `unpdf` / `yaml`）打包成
+**单个自包含的 `dist/index.cjs`**。GitHub Actions 的 node24 运行时直接加载它
+（见 `action.yml`），运行时**不需要 `node_modules`**。所以任何改动 `src/` 的
+PR 在合并前都必须重新构建 `dist/`。
 
 ```bash
 pnpm build
