@@ -141,18 +141,22 @@ async function main() {
     const hidden = toWrite.filter(p => p.hidden).length;
     console.log(`[markuxt-sync-publications] Writing ${toWrite.length} files (${visible} visible, ${hidden} hidden)`);
     // 7. Write markdown files
+    //
+    // Layout (flat per year, no per-paper subdirectory):
+    //   <content_dir>/publications/<year>/<openalex_id>.md
+    //   <content_dir>/publications/<year>/<openalex_id>.png   (when OA PDF screenshot rendered)
     const newFiles = [];
     for (const pub of toWrite) {
-        const dir = join(PUBLICATIONS_DIR, String(pub.year), pub.openalexId);
-        if (!existsSync(dir))
-            mkdirSync(dir, { recursive: true });
+        const yearDir = join(PUBLICATIONS_DIR, String(pub.year));
+        if (!existsSync(yearDir))
+            mkdirSync(yearDir, { recursive: true });
         // 7a. PDF: download, locate abstract page, render screenshot.
         //     Failures are graceful — we still emit the markdown with whatever
         //     metadata we have. We only run this for OA papers with a PDF URL.
         if (pub.pdfUrl && !pub.hidden) {
             try {
-                const relativeDir = join(CONTENT_DIR, 'publications', String(pub.year), pub.openalexId);
-                const result = await processPdf(pub, dir, relativeDir);
+                const relativeYearDir = join(CONTENT_DIR, 'publications', String(pub.year));
+                const result = await processPdf(pub, yearDir, relativeYearDir, pub.openalexId);
                 pub.pdfUrl = result.pdfUrl;
                 pub.abstractPage = result.abstractPage;
                 pub.abstractScreenshot = result.screenshotPath;
@@ -169,7 +173,7 @@ async function main() {
                 console.warn(`  [pdf error] ${err.message}`);
             }
         }
-        const filePath = join(dir, 'index.md');
+        const filePath = join(yearDir, `${pub.openalexId}.md`);
         writeFileSync(filePath, buildMarkdown(pub), 'utf-8');
         console.log(`  [${pub.hidden ? 'hidden' : 'visible'}] ${filePath}`);
         newFiles.push(filePath);

@@ -72,11 +72,12 @@ export declare function _expectedMinShortSide(dpi?: number): number;
 /**
  * End-to-end: download PDF, locate abstract, render screenshot.
  *
- * Caller provides the directory where the screenshot should be written.
- * We name it `abstract-page.png` inside that directory.
+ * Caller provides the directory where the screenshot should be written and
+ * the file basename (without extension). Screenshot goes to
+ * `<outDir>/<name>.png` and is referenced as `<relativeDir>/<name>.png`.
  *
- *   const result = await processPdf(pub, '/path/to/year/openalex_id', 'rel/path')
- *   // → writes /path/to/year/openalex_id/abstract-page.png
+ *   const result = await processPdf(pub, 'publications/2024', 'publications/2024', 'W123')
+ *   // → writes publications/2024/W123.png
  *
  * Returns metadata describing what happened. Never throws — failures
  * downgrade gracefully (skipped=true) so the rest of the sync still runs.
@@ -84,5 +85,5 @@ export declare function _expectedMinShortSide(dpi?: number): number;
 export declare function processPdf(work: {
     abstract: string | null;
     pdfUrl: string | null;
-}, outDir: string, relativeDir: string): Promise<PdfProcessResult>;
+}, outDir: string, relativeDir: string, name?: string): Promise<PdfProcessResult>;
 //# sourceMappingURL=pdf.d.ts.map

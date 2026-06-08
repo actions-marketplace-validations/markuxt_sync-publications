@@ -291,11 +291,12 @@ if (_expectedMinShortSide() < MIN_SHORT_SIDE_PX) {
 /**
  * End-to-end: download PDF, locate abstract, render screenshot.
  *
- * Caller provides the directory where the screenshot should be written.
- * We name it `abstract-page.png` inside that directory.
+ * Caller provides the directory where the screenshot should be written and
+ * the file basename (without extension). Screenshot goes to
+ * `<outDir>/<name>.png` and is referenced as `<relativeDir>/<name>.png`.
  *
- *   const result = await processPdf(pub, '/path/to/year/openalex_id', 'rel/path')
- *   // → writes /path/to/year/openalex_id/abstract-page.png
+ *   const result = await processPdf(pub, 'publications/2024', 'publications/2024', 'W123')
+ *   // → writes publications/2024/W123.png
  *
  * Returns metadata describing what happened. Never throws — failures
  * downgrade gracefully (skipped=true) so the rest of the sync still runs.
@@ -303,7 +304,8 @@ if (_expectedMinShortSide() < MIN_SHORT_SIDE_PX) {
 export async function processPdf(
   work: { abstract: string | null; pdfUrl: string | null },
   outDir: string,
-  relativeDir: string
+  relativeDir: string,
+  name: string = 'abstract-page'
 ): Promise<PdfProcessResult> {
   if (!work.pdfUrl) {
     return { pdfUrl: null, abstractPage: null, screenshotPath: null, skipped: true, reason: 'no PDF URL' }
@@ -346,7 +348,7 @@ export async function processPdf(
   writeFileSync(tmpPdfPath, pdfBuffer)
 
   try {
-    const outPath = join(outDir, 'abstract-page.png')
+    const outPath = join(outDir, `${name}.png`)
     const rendered = await renderPageWithPdftoppm(tmpPdfPath, abstractPage, outPath)
     if (!rendered) {
       return { pdfUrl: work.pdfUrl, abstractPage, screenshotPath: null, skipped: true, reason: 'render failed' }
@@ -355,7 +357,7 @@ export async function processPdf(
     return {
       pdfUrl: work.pdfUrl,
       abstractPage,
-      screenshotPath: join(relativeDir, 'abstract-page.png'),
+      screenshotPath: join(relativeDir, `${name}.png`),
       skipped: false
     }
   } finally {

@@ -101,14 +101,14 @@ orcid: 0000-0001-2345-6789
 
 ## 论文文件格式
 
-生成的论文文件写到：
+生成的论文文件写到（**扁平结构**，每篇论文一个 .md，无子目录）：
 
 ```
-<content_dir>/publications/<year>/<openalex_id>/index.md
-<content_dir>/publications/<year>/<openalex_id>/abstract-page.png   （处理了 OA PDF 时才有）
+<content_dir>/publications/<year>/<openalex_id>.md
+<content_dir>/publications/<year>/<openalex_id>.png   （处理了 OA PDF 时才有）
 ```
 
-每篇 `index.md` 长这样：
+每篇 `<openalex_id>.md` 长这样：
 
 ```yaml
 ---
@@ -125,7 +125,7 @@ openalex_id: W123456789
 venue: Conference Name 2024
 pdf_url: https://example.com/paper.pdf
 abstract_page: 1
-abstract_screenshot: src/publications/2024/W123456789/abstract-page.png
+abstract_screenshot: src/publications/2024/W123456789.png
 keywords:
   - control systems
   - robotics
@@ -154,6 +154,11 @@ keywords:
 
 CJK / Hangul / Kana 标题按单字符切分，避免非拉丁文论文被分词成空集
 （之前的实现因此误判成重复）。
+
+**作者去重**：OpenAlex 的 `authorships` 按 (author × institution) 展开，
+同一个人会重复出现。`parser` 在解析时按 ORCID（首选）和姓名（兜底）
+两个 key 同时去重，保持 `authors` 和 `authors_orcid` 数组并行且第一
+次出现的拼写给定。
 
 同一批 pending 内，同一篇论文的旧版本会被打上 `_hidden: true`；只
 保留最新版本可见。

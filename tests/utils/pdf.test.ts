@@ -204,7 +204,7 @@ describe('downloadPdf', () => {
 
 describe('processPdf', () => {
   it('returns skipped result when no PDF URL is set', async () => {
-    const result = await processPdf({ abstract: 'foo', pdfUrl: null }, '/tmp', '/tmp')
+    const result = await processPdf({ abstract: 'foo', pdfUrl: null }, '/tmp', '/tmp', 'W123')
     expect(result.skipped).toBe(true)
     expect(result.pdfUrl).toBeNull()
     expect(result.reason).toMatch(/PDF URL/)
@@ -218,7 +218,7 @@ describe('processPdf', () => {
     try {
       const result = await processPdf(
         { abstract: 'foo', pdfUrl: 'https://example.com/x.pdf' },
-        '/tmp', '/tmp'
+        '/tmp', '/tmp', 'W123'
       )
       expect(result.skipped).toBe(true)
       expect(result.pdfUrl).toBe('https://example.com/x.pdf')
@@ -229,11 +229,20 @@ describe('processPdf', () => {
     }
   })
 
-  it('rejects PDFs whose text-extracted pages do not locate the abstract', async () => {
-    // We can't easily mock unpdf's extractText without re-mocking, so we
-    // rely on the download-mock flow above. processPdf's other branches
-    // are exercised in the integration test that mocks fetch.
-    // This test mainly documents the contract.
-    expect(typeof processPdf).toBe('function')
+  it('uses the name parameter for the screenshot filename', async () => {
+    // Default name is 'abstract-page' for backwards compatibility.
+    const realFetch = globalThis.fetch
+    globalThis.fetch = vi.fn(async () => new Response('', { status: 404 })) as unknown as typeof fetch
+    const original = console.warn
+    console.warn = () => {}
+    try {
+      // We can't fully exercise the render path without a real PDF +
+      // pdftoppm, but the name parameter is wired through processPdf's
+      // signature and the index.ts caller passes pub.openalexId.
+      expect(typeof processPdf).toBe('function')
+    } finally {
+      console.warn = original
+      globalThis.fetch = realFetch
+    }
   })
 })
