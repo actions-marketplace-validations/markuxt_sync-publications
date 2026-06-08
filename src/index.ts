@@ -10,11 +10,16 @@
  *
  * Usage:
  *   - GitHub Action (see action.yml) — INPUT_* env vars are set automatically.
- *   - Local: see `.env.development` and `pnpm dev`.
+ *   - Local: copy .env.example to .env.development, fill values, `pnpm dev`.
  */
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs'
 import { join } from 'path'
+
+// Local dev: load .env / .env.<NODE_ENV> if present. No-op in CI where
+// process.env is already populated by the runner.
+import { loadEnvFiles } from './utils/env.js'
+loadEnvFiles(undefined, process.env.NODE_ENV || 'development')
 
 // Type imports
 import type { PendingPublication } from './types.js'

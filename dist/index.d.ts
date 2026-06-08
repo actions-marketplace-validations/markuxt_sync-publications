@@ -9,7 +9,7 @@
  *
  * Usage:
  *   - GitHub Action (see action.yml) — INPUT_* env vars are set automatically.
- *   - Local: see `.env.development` and `pnpm dev`.
+ *   - Local: copy .env.example to .env.development, fill values, `pnpm dev`.
  */
 export {};
 //# sourceMappingURL=index.d.ts.map

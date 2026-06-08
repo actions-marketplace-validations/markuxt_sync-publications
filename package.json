@@ -2,13 +2,16 @@
   "name": "sync-publications-action",
   "version": "1.0.0",
   "description": "GitHub Action to sync publications from OpenAlex based on member ORCIDs",
-  "main": "src/index.ts",
+  "main": "dist/index.js",
   "type": "module",
   "scripts": {
     "dev": "tsx src/index.ts",
+    "start": "node dist/index.js",
     "build": "tsc",
     "watch": "tsc --watch",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "lint": "echo \"Linting not configured yet\" && exit 0",
     "format": "echo \"Formatting not configured yet\" && exit 0"
   },
@@ -24,6 +27,7 @@
   "author": "hnrobert",
   "license": "Apache-2.0",
   "dependencies": {
+    "dotenv": "^17.4.2",
     "glob": "^13.0.6",
     "unpdf": "^1.6.2",
     "yaml": "^2.9.0"

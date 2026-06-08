@@ -1,69 +1,82 @@
 #!/bin/bash
-
-# Local test script for sync-publications action
-# This script allows you to test the action locally without GitHub Actions
+#
+# Local test runner for sync-publications.
+#
+# Loads environment from .env.development (preferred for local dev) or .env,
+# exports the INPUT_* variables the action expects, and runs the action via
+# `pnpm dev` (tsx) — no build step required.
+#
+# Usage:
+#   ./test-local.sh
+#   ./test-local.sh --build    # run dist/index.js instead (compiled output)
 
 set -e
 
-echo "🚀 Sync Publications from OpenAlex - Local Test"
+echo "🚀 Sync Publications from OpenAlex — Local Test"
 echo "================================================"
 echo ""
 
-# Check if .env file exists
-if [ ! -f .env ]; then
-  echo "❌ Error: .env file not found"
-  echo "Please copy .env.example to .env and fill in your values:"
-  echo "  cp .env.example .env"
-  echo "  nano .env"
+# Pick the env file: .env.development wins, .env as fallback
+ENV_FILE=""
+if [ -f .env.development ]; then
+  ENV_FILE=".env.development"
+elif [ -f .env ]; then
+  ENV_FILE=".env"
+else
+  echo "❌ No .env / .env.development found."
+  echo "   Copy .env.example to .env.development and fill in your values:"
+  echo "     cp .env.example .env.development"
   exit 1
 fi
 
-# Load environment variables from .env
-echo "📝 Loading configuration from .env..."
-export $(grep -v '^#' .env | xargs)
+echo "📝 Loading $ENV_FILE..."
+set -a
+# shellcheck disable=SC1090
+source "$ENV_FILE"
+set +a
 
 # Validate required variables
 if [ -z "$ROR_ID" ]; then
-  echo "❌ Error: ROR_ID is not set in .env"
+  echo "❌ ROR_ID is not set in $ENV_FILE"
   exit 1
 fi
-
 if [ -z "$CONTACT_EMAIL" ]; then
-  echo "❌ Error: CONTACT_EMAIL is not set in .env"
+  echo "❌ CONTACT_EMAIL is not set in $ENV_FILE"
   exit 1
 fi
-
 if [ -z "$CONTENT_DIR" ]; then
-  echo "⚠️  Warning: CONTENT_DIR not set, using default 'src'"
+  echo "⚠️  CONTENT_DIR not set, using default 'src'"
   export CONTENT_DIR="src"
 fi
 
 echo ""
 echo "Configuration:"
-echo "  ROR ID: ${ROR_ID}"
-echo "  Contact: ${CONTACT_EMAIL}"
-echo "  Content Dir: ${CONTENT_DIR}"
+echo "  ROR ID:      ${ROR_ID}"
+echo "  Contact:     ${CONTACT_EMAIL}"
+echo "  Content dir: ${CONTENT_DIR}"
+echo "  Members dir: ${MEMBERS_DIR:-<content_dir>/members}"
 echo ""
 
-# Check if content directory exists
-if [ ! -d "${CONTENT_DIR}" ]; then
-  echo "❌ Error: Content directory '${CONTENT_DIR}' not found"
-  echo "Please make sure you're running this from the project root"
-  exit 1
-fi
-
-# Set GitHub-specific environment variables for local testing
+# Map "bare" env vars to the INPUT_* convention the action reads.
 export INPUT_ROR_ID="${ROR_ID}"
 export INPUT_CONTACT_EMAIL="${CONTACT_EMAIL}"
 export INPUT_CONTENT_DIR="${CONTENT_DIR}"
-export GITHUB_OUTPUT=""
+export INPUT_MEMBERS_DIR="${MEMBERS_DIR:-}"
+export GITHUB_OUTPUT="${GITHUB_OUTPUT:-}"
 
-echo "🔍 Scanning for members with ORCID..."
+# Run via tsx (no build step needed) — fastest iteration.
+if [ "${1:-}" = "--build" ]; then
+  echo "🏗️  Running compiled dist/index.js"
+  if [ ! -f dist/index.js ]; then
+    echo "   dist/ missing — building first..."
+    pnpm build > /dev/null
+  fi
+  node dist/index.js
+else
+  echo "🏃 Running via tsx (use --build to use compiled dist/)"
+  pnpm dev
+fi
+
 echo ""
-
-# Run the action
-npx tsx src/index.ts
-
-echo ""
-echo "✅ Test completed!"
-echo "Check the '${CONTENT_DIR}/publications/' directory for generated files."
+echo "✅ Test completed."
+echo "Check '${CONTENT_DIR}/publications/' for generated files."
