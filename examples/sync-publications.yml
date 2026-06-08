@@ -1,9 +1,9 @@
 # Copy this file to .github/workflows/sync-publications.yml in your site repo.
 #
 # This workflow consumes the markuxt/sync-publications GitHub Action: it scans
-# <content_dir>/members/*.md for ORCIDs, fetches matching works from OpenAlex
+# <members_dir>/*.md for ORCIDs, fetches matching works from OpenAlex
 # (filtered by your institution's ROR), and writes new markdown under
-# <content_dir>/publications/<year>/. New files are committed back to the
+# <publications_dir>/<year>/. New files are committed back to the
 # triggering branch.
 #
 # Prerequisites — add these repository secrets:
@@ -27,10 +27,14 @@ on:
       - ".github/workflows/sync-publications.yml"
   workflow_dispatch:
     inputs:
-      content_dir:
-        description: "Content directory (default: src)"
+      members_dir:
+        description: "Members directory (default: src/members)"
         required: false
-        default: "src"
+        default: "src/members"
+      publications_dir:
+        description: "Publications directory (default: src/publications)"
+        required: false
+        default: "src/publications"
 
 permissions:
   contents: write
@@ -47,11 +51,12 @@ jobs:
         with:
           ror_id: ${{ secrets.OPENALEX_ROR_ID }}
           contact_email: ${{ secrets.OPENALEX_CONTACT_EMAIL }}
-          content_dir: ${{ inputs.content_dir || 'src' }}
+          members_dir: ${{ inputs.members_dir || 'src/members' }}
+          publications_dir: ${{ inputs.publications_dir || 'src/publications' }}
 
       - name: Commit new publications
         env:
-          CONTENT_DIR: ${{ inputs.content_dir || 'src' }}
+          PUBLICATIONS_DIR: ${{ inputs.publications_dir || 'src/publications' }}
           COUNT: ${{ steps.sync.outputs.new_publications_count }}
           FILES: ${{ steps.sync.outputs.new_publications_files }}
         run: |
@@ -61,7 +66,7 @@ jobs:
           fi
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add "${CONTENT_DIR}/publications/"
+          git add "${PUBLICATIONS_DIR}/"
           git commit -m "chore: sync ${COUNT} publication(s) from OpenAlex"
           git push
 

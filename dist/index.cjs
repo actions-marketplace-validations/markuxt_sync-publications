@@ -53063,8 +53063,8 @@ function deduplicatePending(pending) {
 loadEnvFiles(void 0, process.env.NODE_ENV || "development");
 var ROR_ID = process.env.INPUT_ROR_ID || process.env.ROR_ID || "";
 var CONTACT_EMAIL = process.env.INPUT_CONTACT_EMAIL || process.env.CONTACT_EMAIL || "";
-var CONTENT_DIR = process.env.INPUT_CONTENT_DIR || process.env.CONTENT_DIR || "src";
 var MEMBERS_DIR_INPUT = process.env.INPUT_MEMBERS_DIR || process.env.MEMBERS_DIR || "";
+var PUBLICATIONS_DIR_INPUT = process.env.INPUT_PUBLICATIONS_DIR || process.env.PUBLICATIONS_DIR || "";
 var GITHUB_OUTPUT = process.env.GITHUB_OUTPUT || "";
 if (!ROR_ID) {
   console.error("Error: ROR_ID (or INPUT_ROR_ID) is required");
@@ -53074,8 +53074,8 @@ if (!CONTACT_EMAIL) {
   console.error("Error: CONTACT_EMAIL (or INPUT_CONTACT_EMAIL) is required");
   process.exit(1);
 }
-var PUBLICATIONS_DIR = (0, import_path3.join)(CONTENT_DIR, "publications");
-var MEMBERS_DIR = MEMBERS_DIR_INPUT ? MEMBERS_DIR_INPUT.startsWith("/") ? MEMBERS_DIR_INPUT : (0, import_path3.join)(process.cwd(), MEMBERS_DIR_INPUT) : (0, import_path3.join)(CONTENT_DIR, "members");
+var MEMBERS_DIR = MEMBERS_DIR_INPUT || "src/members";
+var PUBLICATIONS_DIR = PUBLICATIONS_DIR_INPUT || "src/publications";
 initGitHubOutput(GITHUB_OUTPUT);
 function buildMarkdown(pub) {
   const lines = ["---", `_hidden: ${pub.hidden}`];
@@ -53104,7 +53104,7 @@ function buildMarkdown(pub) {
 async function main() {
   console.log(`[markuxt-sync-publications] Starting...`);
   console.log(`[markuxt-sync-publications] ROR ID: ${ROR_ID}`);
-  console.log(`[markuxt-sync-publications] Content dir: ${CONTENT_DIR}`);
+  console.log(`[markuxt-sync-publications] Publications dir: ${PUBLICATIONS_DIR}`);
   console.log(`[markuxt-sync-publications] Members dir: ${MEMBERS_DIR}`);
   const institutionId = await getInstitutionId(ROR_ID, CONTACT_EMAIL);
   console.log(`[markuxt-sync-publications] Institution ID: ${institutionId}`);
@@ -53157,7 +53157,7 @@ async function main() {
     used.add(stem);
     if (pub.pdfUrl && !pub.hidden) {
       try {
-        const relativeYearDir = (0, import_path3.join)(CONTENT_DIR, "publications", yearKey);
+        const relativeYearDir = (0, import_path3.join)(PUBLICATIONS_DIR, yearKey);
         const result = await processPdf(pub, yearDir, relativeYearDir, stem);
         pub.pdfUrl = result.pdfUrl;
         pub.abstractPage = result.abstractPage;

@@ -1,7 +1,7 @@
 # Sync Publications from OpenAlex
 
 A GitHub Action that fetches publications from [OpenAlex](https://openalex.org)
-based on your members' ORCIDs and writes them to your content directory as
+based on your members' ORCIDs and writes them to your publications directory as
 markdown. Each generated publication file contains the title, authors, ORCIDs,
 year, DOI, venue, keywords, a reconstructed abstract, the PDF link, and — when
 an open-access PDF is available — a screenshot of the page containing the
@@ -33,7 +33,8 @@ abstract.
   with:
     ror_id: 'https://ror.org/03y4dt428'
     contact_email: 'contact@example.com'
-    content_dir: 'src'
+    members_dir: 'src/members'
+    publications_dir: 'src/publications'
 ```
 
 See the [full workflow example](#full-workflow-example) below.
@@ -66,17 +67,18 @@ The institution's ROR ID. Look yours up at <https://ror.org>.
 
 The contact email required by OpenAlex's polite-pool policy.
 
-### `content_dir` (optional, default `src`)
+### `members_dir` (optional, default `src/members`)
 
-The directory holding members and publications (relative to the repo root or
-absolute). Member markdown lives under `<content_dir>/members/`; publication
-artifacts are written to `<content_dir>/publications/`.
+The directory scanned for member markdown files (relative to the repo root
+or absolute). Set this if your members live somewhere other than
+`src/members` (e.g. `src/people`).
 
-### `members_dir` (optional)
+### `publications_dir` (optional, default `src/publications`)
 
-Override the default members directory if your layout differs (e.g.
-`content/people`). Both relative (to the repo root) and absolute paths are
-supported. Defaults to `<content_dir>/members`.
+The directory where generated publication markdown and screenshots are
+written (relative to the repo root or absolute). Defaults to
+`src/publications` and is independent of `members_dir`, so members and
+publications can live under different roots.
 
 ## Outputs
 
@@ -91,8 +93,8 @@ format so it is never truncated).
 
 ## Member file format
 
-Member markdown files live at `<content_dir>/members/**/*.md` (or your
-overridden `members_dir`). They must contain an `orcid` field:
+Member markdown files live at `<members_dir>/**/*.md` (default
+`src/members`). They must contain an `orcid` field:
 
 ```yaml
 ---
@@ -111,8 +113,8 @@ Generated publication files are written to a **flat layout** (one `.md` per
 publication, no subdirectory):
 
 ```text
-<content_dir>/publications/<year>/<title-slug>.md
-<content_dir>/publications/<year>/<title-slug>.png   (only when an OA PDF was processed)
+<publications_dir>/<year>/<title-slug>.md
+<publications_dir>/<year>/<title-slug>.png   (only when an OA PDF was processed)
 ```
 
 The filename is a slugified form of the title (lowercase / whitespace and
@@ -279,7 +281,8 @@ jobs:
         with:
           ror_id: 'https://ror.org/03y4dt428'
           contact_email: 'research-lab@example.com'
-          content_dir: 'src'
+          members_dir: 'src/members'
+          publications_dir: 'src/publications'
 
       - name: Commit new publications
         env:
