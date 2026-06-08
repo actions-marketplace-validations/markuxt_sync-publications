@@ -1,16 +1,22 @@
 /**
- * Parse OpenAlex work data into PendingPublication format
+ * Parse OpenAlex work data into PendingPublication format.
+ *
+ * Addresses docs/code-review.md #14 — accepts the typed `OpenAlexWork`
+ * directly (the cast from `unknown` happens once, at the API boundary,
+ * in `openalex.ts`).
  */
 
 import type { PendingPublication, OpenAlexWork } from '../types.js'
 import { formatAuthorName, extractOrcidId } from '../utils/formatters.js'
 import { reconstructAbstract } from '../utils/abstract.js'
+import { doiToUrl } from '../utils/doi.js'
 
 /**
- * Parse OpenAlex work object into our publication format
+ * Parse an OpenAlex work object into our internal publication format.
+ * Returns null if the work is missing required fields (id / title / year).
  */
-export function parseWork(work: OpenAlexWork | Record<string, unknown>): PendingPublication | null {
-  // Extract OpenAlex ID
+export function parseWork(work: OpenAlexWork): PendingPublication | null {
+  // Extract OpenAlex ID (strip the URL prefix to get W123456789)
   const rawId = typeof work.id === 'string'
     ? work.id.replace('https://openalex.org/', '')
     : null
@@ -26,47 +32,33 @@ export function parseWork(work: OpenAlexWork | Record<string, unknown>): Pending
   if (!year) return null
 
   // Extract authors
-  const authorships = Array.isArray(work.authorships)
-    ? work.authorships as Record<string, unknown>[]
-    : []
+  const authorships = Array.isArray(work.authorships) ? work.authorships : []
 
   const authors = authorships
     .map(a => {
-      const author = a.author as Record<string, unknown> | undefined
-      return author?.display_name ? formatAuthorName(String(author.display_name)) : null
+      const name = a.author?.display_name
+      return name ? formatAuthorName(name) : null
     })
     .filter((n): n is string => n !== null)
 
-  // Extract author ORCIDs
-  const authorsOrcid = authorships.map(a => {
-    const author = a.author as Record<string, unknown> | undefined
-    return extractOrcidId(author?.orcid ? String(author.orcid) : null)
-  })
+  // Extract author ORCIDs (parallel to authors, includes nulls to preserve order)
+  const authorsOrcid = authorships.map(a => extractOrcidId(a.author?.orcid))
 
-  // Extract DOI
-  const doiRaw = typeof work.doi === 'string' ? work.doi : null
-  const doi = doiRaw
-    ? (doiRaw.startsWith('http') ? doiRaw : `https://doi.org/${doiRaw}`)
-    : null
+  // Extract DOI — canonical https://doi.org/ form
+  const doi = doiToUrl(work.doi)
 
   // Extract venue
-  const primaryLocation = work.primary_location as Record<string, unknown> | undefined
-  const source = primaryLocation?.source as Record<string, unknown> | undefined
-  const venue = source?.display_name ? String(source.display_name) : null
+  const venue = work.primary_location?.source?.display_name ?? null
 
   // Extract keywords
-  const keywordsRaw = Array.isArray(work.keywords)
-    ? work.keywords as Record<string, unknown>[]
+  const keywords = Array.isArray(work.keywords)
+    ? work.keywords
+        .map(k => k.display_name ?? '')
+        .filter(Boolean)
     : []
 
-  const keywords = keywordsRaw
-    .map(k => String(k.display_name ?? ''))
-    .filter(Boolean)
-
-  // Extract abstract
-  const abstract = reconstructAbstract(
-    work.abstract_inverted_index as Record<string, number[]> | null
-  )
+  // Extract abstract (reconstructed from inverted index)
+  const abstract = reconstructAbstract(work.abstract_inverted_index ?? null)
 
   return {
     openalexId: rawId,

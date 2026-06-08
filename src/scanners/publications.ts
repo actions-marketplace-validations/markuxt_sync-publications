@@ -1,14 +1,20 @@
 /**
- * Scan existing publications from content directory
+ * Scan existing publications from content directory.
+ *
+ * Addresses docs/code-review.md #15 — explicit radix for parseInt.
  */
 
 import { readFileSync } from 'fs'
 import { parseYamlFrontmatter } from '../utils/yaml.js'
 import { findMarkdownFiles } from '../utils/glob.js'
+import { normalizeDoi } from '../utils/doi.js'
 import type { ExistingPublication } from '../types.js'
 
 /**
- * Scan all existing publications and extract metadata for deduplication
+ * Scan all existing publications and extract metadata for deduplication.
+ *
+ * Note: we keep raw `openalex_id` (with leading W) here — the comparison
+ * set in `index.ts` strips the W so both forms of stored ID match.
  */
 export async function scanExistingPublications(
   publicationsDir: string
@@ -27,15 +33,17 @@ export async function scanExistingPublications(
       ? fm.openalex_id.replace(/^W/, '')
       : undefined
 
-    const doi = typeof fm.doi === 'string' && fm.doi ? fm.doi : undefined
+    const doi = normalizeDoi(typeof fm.doi === 'string' ? fm.doi : null)
+
     const title = typeof fm.title === 'string' ? fm.title : undefined
-    const year = typeof fm.year === 'string'
-      ? parseInt(fm.year)
-      : (typeof fm.year === 'number' ? fm.year : undefined)
+
+    const year = typeof fm.year === 'number'
+      ? fm.year
+      : (typeof fm.year === 'string' ? parseInt(fm.year, 10) : undefined)
 
     const authors = Array.isArray(fm.authors) ? fm.authors as string[] : undefined
 
-    existing.push({ openalexId, doi, title, year, authors })
+    existing.push({ openalexId, doi: doi ?? undefined, title, year, authors })
   }
 
   return existing

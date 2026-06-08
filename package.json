@@ -24,12 +24,16 @@
   "author": "hnrobert",
   "license": "Apache-2.0",
   "dependencies": {
-    "glob": "^13.0.6"
+    "glob": "^13.0.6",
+    "unpdf": "^1.6.2",
+    "yaml": "^2.9.0"
   },
   "devDependencies": {
+    "@types/node": "^25.2.3",
+    "@vitest/coverage-v8": "^4.1.8",
     "tsx": "^4.19.0",
     "typescript": "^5.7.3",
-    "@types/node": "^25.2.3"
+    "vitest": "^4.1.8"
   },
   "repository": {
     "type": "git",

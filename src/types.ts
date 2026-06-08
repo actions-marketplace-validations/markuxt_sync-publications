@@ -62,3 +62,12 @@ export interface OpenAlexResponse<T> {
     next_cursor?: string | null
   }
 }
+
+/**
+ * Options for HTTP fetch with retry/timeout
+ */
+export interface FetchOptions {
+  timeoutMs?: number
+  retries?: number
+  signal?: AbortSignal
+}

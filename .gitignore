@@ -74,6 +74,7 @@ web_modules/
 
 # dotenv environment variable files
 .env
+.env.development
 .env.development.local
 .env.test.local
 .env.production.local
@@ -89,7 +90,9 @@ out
 
 # Nuxt.js build / generate output
 .nuxt
-dist
+
+# NOTE: dist/ is intentionally tracked for the GitHub Action runtime.
+# node20 in actions runs against dist/index.js (see action.yml).
 
 # Gatsby files
 .cache/

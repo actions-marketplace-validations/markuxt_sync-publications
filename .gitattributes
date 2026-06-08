@@ -1,2 +1,7 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Mark the action's compiled bundle as generated so diffs/PRs hide it.
+dist/** linguist-generated=true
+dist/** -diff
+pnpm-lock.yaml linguist-generated=true

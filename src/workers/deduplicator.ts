@@ -1,12 +1,21 @@
 /**
- * Deduplication worker for processing pending publications
+ * Deduplication worker for processing pending publications.
+ *
+ * Addresses docs/code-review.md #15 — uses a shared `normalizeDoi` so the
+ * DOI comparison stays in lock-step with `parser.ts`.
  */
 
 import type { PendingPublication, ExistingPublication } from '../types.js'
 import { isDuplicate } from '../utils/deduplication.js'
+import { normalizeDoi } from '../utils/doi.js'
 
 /**
- * Filter out publications that already exist
+ * Filter out publications that already exist in the content directory.
+ *
+ * Three checks (any match ⇒ skip):
+ *   1. Same OpenAlex ID.
+ *   2. Same DOI (after normalisation).
+ *   3. Heuristic similarity (title Jaccard + author overlap + year window).
  */
 export function filterDuplicates(
   pending: Map<string, PendingPublication>,
@@ -19,16 +28,13 @@ export function filterDuplicates(
   for (const pub of pending.values()) {
     const shortId = pub.openalexId.replace(/^W/, '')
 
-    // Skip if OpenAlex ID exists
     if (existingOpenalexIds.has(shortId)) continue
 
-    // Skip if DOI exists
-    const doiKey = pub.doi?.toLowerCase().replace(/https?:\/\/doi\.org\//i, '')
+    const doiKey = normalizeDoi(pub.doi)
     if (doiKey && existingDois.has(doiKey)) continue
 
-    // Check similarity-based duplicates
     const dupOfExisting = existing.some(e =>
-      e.title && e.year != null &&
+      e.title != null && e.year != null &&
       isDuplicate(
         { title: pub.title, year: pub.year, authors: pub.authors },
         { title: e.title, year: e.year, authors: e.authors ?? [] }
@@ -44,7 +50,8 @@ export function filterDuplicates(
 }
 
 /**
- * Deduplicate within pending list, keep newest per group
+ * Deduplicate within the pending list, marking older versions of the same
+ * publication as hidden. Within each group, the newest entry stays visible.
  */
 export function deduplicatePending(pending: PendingPublication[]): PendingPublication[] {
   const toWrite: PendingPublication[] = []
@@ -55,15 +62,18 @@ export function deduplicatePending(pending: PendingPublication[]): PendingPublic
 
     const group: number[] = [i]
 
-    // Find all duplicates within pending list
     for (let j = i + 1; j < pending.length; j++) {
       if (consumed.has(j)) continue
 
       const a = pending[i]
       const b = pending[j]
 
-      const sameDoi = !!(a.doi && b.doi && a.doi.toLowerCase() === b.doi.toLowerCase())
+      const aDoi = normalizeDoi(a.doi)
+      const bDoi = normalizeDoi(b.doi)
+      const sameDoi = !!(aDoi && bDoi && aDoi === bDoi)
+
       const sameTitle = a.title.toLowerCase().trim() === b.title.toLowerCase().trim()
+
       const similar = isDuplicate(
         { title: a.title, year: a.year, authors: a.authors },
         { title: b.title, year: b.year, authors: b.authors }

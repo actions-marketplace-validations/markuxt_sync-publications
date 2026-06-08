@@ -4,22 +4,25 @@
  * markuxt-sync-publications
  *
  * GitHub Action to sync publications from OpenAlex based on member ORCIDs.
- * Fetches publications for all members with ORCID, deduplicates against existing
- * content, and writes new markdown files to <content_dir>/publications/<year>/<openalex_id>/index.md
+ * Fetches publications for all members with ORCID, deduplicates against
+ * existing content, and writes new markdown files to
+ * <content_dir>/publications/<year>/<openalex_id>/index.md
  *
- * Usage: Called via GitHub Action (see action.yml) or directly:
- *   ROR_ID="https://ror.org/..." CONTACT_EMAIL="..." CONTENT_DIR="src" npx tsx src/index.ts
+ * Usage:
+ *   - GitHub Action (see action.yml) — INPUT_* env vars are set automatically.
+ *   - Local: see `.env.development` and `pnpm dev`.
  */
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs'
 import { join } from 'path'
 
 // Type imports
-import type { PendingPublication, ExistingPublication } from './types.js'
+import type { PendingPublication } from './types.js'
 
 // Utility imports
 import { yamlStr } from './utils/yaml.js'
 import { initGitHubOutput, setOutput } from './utils/github.js'
+import { normalizeDoi } from './utils/doi.js'
 
 // API imports
 import {
@@ -38,27 +41,30 @@ import { filterDuplicates, deduplicatePending } from './workers/deduplicator.js'
 
 // ---------------------------------------------------------------------------
 // Configuration
+ //
+// Accept both INPUT_* (GitHub Actions convention) and bare names (local dev
+// convenience, see docs/code-review.md #5).
 // ---------------------------------------------------------------------------
 
-const ROR_ID = process.env.INPUT_ROR_ID || ''
-const CONTACT_EMAIL = process.env.INPUT_CONTACT_EMAIL || ''
-const CONTENT_DIR = process.env.INPUT_CONTENT_DIR || 'src'
+const ROR_ID = process.env.INPUT_ROR_ID || process.env.ROR_ID || ''
+const CONTACT_EMAIL = process.env.INPUT_CONTACT_EMAIL || process.env.CONTACT_EMAIL || ''
+const CONTENT_DIR = process.env.INPUT_CONTENT_DIR || process.env.CONTENT_DIR || 'src'
 const GITHUB_OUTPUT = process.env.GITHUB_OUTPUT || ''
 
 if (!ROR_ID) {
-  console.error('Error: INPUT_ROR_ID is required')
+  console.error('Error: ROR_ID (or INPUT_ROR_ID) is required')
   process.exit(1)
 }
 
 if (!CONTACT_EMAIL) {
-  console.error('Error: INPUT_CONTACT_EMAIL is required')
+  console.error('Error: CONTACT_EMAIL (or INPUT_CONTACT_EMAIL) is required')
   process.exit(1)
 }
 
 const PUBLICATIONS_DIR = join(CONTENT_DIR, 'publications')
 const MEMBERS_DIR = join(CONTENT_DIR, 'members')
 
-// Initialize GitHub output
+// Initialize GitHub output (no-op locally when GITHUB_OUTPUT is empty)
 initGitHubOutput(GITHUB_OUTPUT)
 
 // ---------------------------------------------------------------------------
@@ -111,7 +117,7 @@ async function main() {
   )
   const existingDois = new Set(
     existing
-      .map(p => p.doi?.toLowerCase().replace(/https?:\/\/doi\.org\//i, ''))
+      .map(p => normalizeDoi(p.doi))
       .filter((d): d is string => !!d)
   )
   console.log(`[markuxt-sync-publications] Found ${existing.length} existing publications`)
@@ -137,7 +143,7 @@ async function main() {
     console.log(`  → ${works.length} works`)
 
     for (const w of works) {
-      const pub = parseWork(w as Record<string, unknown>)
+      const pub = parseWork(w)
       if (!pub) continue
       if (!allWorks.has(pub.openalexId)) allWorks.set(pub.openalexId, pub)
     }
@@ -169,9 +175,10 @@ async function main() {
     newFiles.push(filePath)
   }
 
-  // 8. Set GitHub Actions outputs
-  setOutput('count', String(newFiles.length))
-  setOutput('files', newFiles.join('\n'))
+  // 8. Set GitHub Actions outputs.
+  // Names match action.yml's published contract (see docs/code-review.md #3).
+  setOutput('new_publications_count', String(newFiles.length))
+  setOutput('new_publications_files', newFiles.join('\n'))
 
   console.log(`[markuxt-sync-publications] Done. Added ${newFiles.length} publication files.`)
 }
