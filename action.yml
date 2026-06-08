@@ -1,4 +1,4 @@
-name: 'Sync Publications from OpenAlex'
+name: "Sync Markuxt Site Members' Publications"
 description: 'Fetches publications from OpenAlex based on member ORCIDs and syncs them to your publications directory'
 
 branding:
