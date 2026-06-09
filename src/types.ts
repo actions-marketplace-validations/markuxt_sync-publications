@@ -3,12 +3,26 @@
  */
 
 export interface ExistingPublication {
+  /** Absolute path to the publication markdown file. */
+  file: string
   openalexId?: string
   doi?: string
   title?: string
   year?: number
   authors?: string[]
+  /** Whether the file already has a non-empty `openalex_id` frontmatter field. */
+  hasOpenalexId: boolean
+  /** Whether the file already has a non-empty `authors_orcid` list. */
+  hasAuthorsOrcid: boolean
 }
+
+/**
+ * Outcome of a backfill attempt on a single existing publication file.
+ */
+export type BackfillResult =
+  | { status: 'complete' }
+  | { status: 'no_match'; file: string; reason: string }
+  | { status: 'backfilled'; file: string; openalexId?: string; changes: string[] }
 
 export interface PendingPublication {
   openalexId: string
@@ -64,7 +78,8 @@ export interface OpenAccessLocation {
 export interface Authorship {
   author?: {
     display_name?: string
-    orcid?: string
+    /** OpenAlex returns null for authors with no ORCID. */
+    orcid?: string | null
   }
 }
 

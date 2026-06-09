@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { mkdirSync, writeFileSync, rmSync } from 'fs'
 import { join } from 'path'
 import { tmpdir } from 'os'
-import { scanMembersWithOrcid, _internal } from '../../src/scanners/members.js'
+import { scanMembersWithOrcid, _internal } from '../../src/scanners/members'
 
 let dir: string
 

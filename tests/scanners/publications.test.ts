@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { mkdirSync, writeFileSync, rmSync } from 'fs'
 import { join } from 'path'
 import { tmpdir } from 'os'
-import { scanExistingPublications } from '../../src/scanners/publications.js'
+import { scanExistingPublications } from '../../src/scanners/publications'
 
 let dir: string
 
@@ -40,11 +40,14 @@ Body text here.
     const pubs = await scanExistingPublications(dir)
     expect(pubs).toHaveLength(1)
     expect(pubs[0]).toEqual({
+      file: expect.any(String),
       openalexId: '1', // leading W stripped
       doi: '10.1000/foo', // normalised
       title: 'A Study of Robots',
       year: 2024,
-      authors: ['Doe, John']
+      authors: ['Doe, John'],
+      hasOpenalexId: true,
+      hasAuthorsOrcid: false
     })
   })
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { slugify, pickFilenameStem } from '../../src/utils/slugify.js'
+import { slugify, pickFilenameStem } from '../../src/utils/slugify'
 
 describe('slugify', () => {
   it('lowercases and dashes whitespace', () => {

@@ -11,10 +11,10 @@
  */
 
 import { readFileSync } from 'fs'
-import { parseYamlFrontmatter } from '../utils/yaml.js'
-import { findMarkdownFiles } from '../utils/glob.js'
-import { extractOrcidId } from '../utils/formatters.js'
-import type { MemberInfo } from '../types.js'
+import { parseYamlFrontmatter } from '../utils/yaml'
+import { findMarkdownFiles } from '../utils/glob'
+import { extractOrcidId } from '../utils/formatters'
+import type { MemberInfo } from '../types'
 
 const ORCID_PATTERN = /^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$/
 

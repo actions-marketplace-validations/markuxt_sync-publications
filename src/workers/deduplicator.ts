@@ -5,9 +5,9 @@
  * DOI comparison stays in lock-step with `parser.ts`.
  */
 
-import type { PendingPublication, ExistingPublication } from '../types.js'
-import { isDuplicate } from '../utils/deduplication.js'
-import { normalizeDoi } from '../utils/doi.js'
+import type { PendingPublication, ExistingPublication } from '../types'
+import { isDuplicate } from '../utils/deduplication'
+import { normalizeDoi } from '../utils/doi'
 
 /**
  * Filter out publications that already exist in the content directory.

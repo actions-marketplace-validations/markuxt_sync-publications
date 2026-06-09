@@ -16,33 +16,34 @@ import { join } from 'path'
 
 // Local dev: load .env / .env.<NODE_ENV> if present. No-op in CI where
 // process.env is already populated by the runner.
-import { loadEnvFiles } from './utils/env.js'
+import { loadEnvFiles } from './utils/env'
 loadEnvFiles(undefined, process.env.NODE_ENV || 'development')
 
 // Type imports
-import type { PendingPublication } from './types.js'
+import type { PendingPublication } from './types'
 
 // Utility imports
-import { yamlStr } from './utils/yaml.js'
-import { initGitHubOutput, setOutput } from './utils/github.js'
-import { normalizeDoi } from './utils/doi.js'
-import { processPdf } from './utils/pdf.js'
-import { pickFilenameStem } from './utils/slugify.js'
+import { yamlStr } from './utils/yaml'
+import { initGitHubOutput, setOutput } from './utils/github'
+import { normalizeDoi } from './utils/doi'
+import { processPdf } from './utils/pdf'
+import { pickFilenameStem } from './utils/slugify'
 
 // API imports
 import {
   getInstitutionId,
   getAuthorId,
   getWorksForAuthor
-} from './utils/openalex.js'
+} from './utils/openalex'
 
 // Scanner imports
-import { scanExistingPublications } from './scanners/publications.js'
-import { scanMembersWithOrcid } from './scanners/members.js'
+import { scanExistingPublications } from './scanners/publications'
+import { scanMembersWithOrcid } from './scanners/members'
 
 // Worker imports
-import { parseWork } from './workers/parser.js'
-import { filterDuplicates, deduplicatePending } from './workers/deduplicator.js'
+import { parseWork } from './workers/parser'
+import { filterDuplicates, deduplicatePending } from './workers/deduplicator'
+import { backfillExisting } from './workers/backfill'
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -130,6 +131,16 @@ async function main() {
 
   // 2. Scan existing publications
   const existing = await scanExistingPublications(PUBLICATIONS_DIR)
+  console.log(`[markuxt-sync-publications] Found ${existing.length} existing publications`)
+
+  // 2a. Backfill existing publications that are missing openalex_id and/or
+  // authors_orcid, by looking them up on OpenAlex. Idempotent — it only
+  // fills missing fields and preserves the body. Runs before the dedup sets
+  // are built so newly-resolved IDs suppress the same works from being
+  // re-added as new.
+  const backfilledFiles = await backfillExisting(existing, CONTACT_EMAIL)
+  console.log(`[markuxt-sync-publications] Backfilled ${backfilledFiles.length} existing publication(s)`)
+
   const existingOpenalexIds = new Set(
     existing.map(p => p.openalexId).filter((id): id is string => !!id)
   )
@@ -138,7 +149,6 @@ async function main() {
       .map(p => normalizeDoi(p.doi))
       .filter((d): d is string => !!d)
   )
-  console.log(`[markuxt-sync-publications] Found ${existing.length} existing publications`)
 
   // 3. Scan members with ORCID
   const members = await scanMembersWithOrcid(MEMBERS_DIR)
@@ -238,6 +248,8 @@ async function main() {
   // Names match action.yml's published contract (see docs/code-review.md #3).
   setOutput('new_publications_count', String(newFiles.length))
   setOutput('new_publications_files', newFiles.join('\n'))
+  setOutput('backfilled_publications_count', String(backfilledFiles.length))
+  setOutput('backfilled_publications_files', backfilledFiles.join('\n'))
 
   console.log(`[markuxt-sync-publications] Done. Added ${newFiles.length} publication files.`)
 }

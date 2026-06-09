@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { formatAuthorName, extractOrcidId } from '../../src/utils/formatters.js'
+import { formatAuthorName, extractOrcidId } from '../../src/utils/formatters'
 
 describe('formatAuthorName', () => {
   it('formats "John Doe" as "Doe, John"', () => {
