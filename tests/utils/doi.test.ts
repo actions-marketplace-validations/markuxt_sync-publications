@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { normalizeDoi, doiToUrl } from '../../src/utils/doi.js'
+import { normalizeDoi, doiToUrl } from '../../src/utils/doi'
 
 describe('normalizeDoi', () => {
   it('returns null for empty / nullish input', () => {

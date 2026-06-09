@@ -16,34 +16,34 @@ import { join } from 'path'
 
 // Local dev: load .env / .env.<NODE_ENV> if present. No-op in CI where
 // process.env is already populated by the runner.
-import { loadEnvFiles } from './utils/env.js'
+import { loadEnvFiles } from './utils/env'
 loadEnvFiles(undefined, process.env.NODE_ENV || 'development')
 
 // Type imports
-import type { PendingPublication } from './types.js'
+import type { PendingPublication } from './types'
 
 // Utility imports
-import { yamlStr } from './utils/yaml.js'
-import { initGitHubOutput, setOutput } from './utils/github.js'
-import { normalizeDoi } from './utils/doi.js'
-import { processPdf } from './utils/pdf.js'
-import { pickFilenameStem } from './utils/slugify.js'
+import { yamlStr } from './utils/yaml'
+import { initGitHubOutput, setOutput } from './utils/github'
+import { normalizeDoi } from './utils/doi'
+import { processPdf } from './utils/pdf'
+import { pickFilenameStem } from './utils/slugify'
 
 // API imports
 import {
   getInstitutionId,
   getAuthorId,
   getWorksForAuthor
-} from './utils/openalex.js'
+} from './utils/openalex'
 
 // Scanner imports
-import { scanExistingPublications } from './scanners/publications.js'
-import { scanMembersWithOrcid } from './scanners/members.js'
+import { scanExistingPublications } from './scanners/publications'
+import { scanMembersWithOrcid } from './scanners/members'
 
 // Worker imports
-import { parseWork } from './workers/parser.js'
-import { filterDuplicates, deduplicatePending } from './workers/deduplicator.js'
-import { backfillExisting } from './workers/backfill.js'
+import { parseWork } from './workers/parser'
+import { filterDuplicates, deduplicatePending } from './workers/deduplicator'
+import { backfillExisting } from './workers/backfill'
 
 // ---------------------------------------------------------------------------
 // Configuration

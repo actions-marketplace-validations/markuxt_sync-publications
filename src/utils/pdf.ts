@@ -24,8 +24,8 @@ import { spawn } from 'child_process'
 import { mkdirSync, writeFileSync, existsSync, unlinkSync, renameSync } from 'fs'
 import { join, extname } from 'path'
 import { extractText } from 'unpdf'
-import { fetchWithRetry } from './http.js'
-import type { OpenAlexWork, PdfProcessResult } from '../types.js'
+import { fetchWithRetry } from './http'
+import type { OpenAlexWork, PdfProcessResult } from '../types'
 
 const SCREENSHOT_DPI = 200
 const MIN_SHORT_SIDE_PX = 1000

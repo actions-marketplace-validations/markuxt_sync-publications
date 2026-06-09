@@ -6,7 +6,7 @@
  * (a single 429/5xx hiccup would fail the entire sync).
  */
 
-import type { FetchOptions } from '../types.js'
+import type { FetchOptions } from '../types'
 
 const DEFAULT_TIMEOUT_MS = 30_000
 const DEFAULT_RETRIES = 3

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { fetchWithRetry } from '../../src/utils/http.js'
+import { fetchWithRetry } from '../../src/utils/http'
 
 describe('fetchWithRetry', () => {
   const realFetch = globalThis.fetch

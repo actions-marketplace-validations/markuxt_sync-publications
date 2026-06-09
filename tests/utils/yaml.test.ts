@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { parseYamlFrontmatter, yamlStr, updateFrontmatter } from '../../src/utils/yaml.js'
+import { parseYamlFrontmatter, yamlStr, updateFrontmatter } from '../../src/utils/yaml'
 
 describe('parseYamlFrontmatter', () => {
   it('returns an empty object when there is no frontmatter', () => {

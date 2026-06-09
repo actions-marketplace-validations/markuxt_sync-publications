@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { reconstructAbstract } from '../../src/utils/abstract.js'
+import { reconstructAbstract } from '../../src/utils/abstract'
 
 describe('reconstructAbstract', () => {
   it('returns null for null/undefined input', () => {

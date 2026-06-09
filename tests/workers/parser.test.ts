@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { parseWork } from '../../src/workers/parser.js'
-import type { OpenAlexWork } from '../../src/types.js'
+import { parseWork } from '../../src/workers/parser'
+import type { OpenAlexWork } from '../../src/types'
 
 const baseWork: OpenAlexWork = {
   id: 'https://openalex.org/W274' as unknown as string,

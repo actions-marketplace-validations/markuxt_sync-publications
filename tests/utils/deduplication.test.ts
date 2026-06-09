@@ -5,7 +5,7 @@ import {
   authorOverlap,
   isDuplicate,
   _resetTokenizeCache
-} from '../../src/utils/deduplication.js'
+} from '../../src/utils/deduplication'
 
 describe('tokenize', () => {
   it('returns an empty set for empty input', () => {

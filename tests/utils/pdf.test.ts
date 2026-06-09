@@ -6,8 +6,8 @@ import {
   downloadPdf,
   processPdf,
   _expectedMinShortSide
-} from '../../src/utils/pdf.js'
-import type { OpenAlexWork } from '../../src/types.js'
+} from '../../src/utils/pdf'
+import type { OpenAlexWork } from '../../src/types'
 
 describe('pickPdfUrl', () => {
   it('prefers best_oa_location.pdf_url', () => {

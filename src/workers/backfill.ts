@@ -14,12 +14,12 @@
  */
 
 import { readFileSync, writeFileSync } from 'fs'
-import type { ExistingPublication, OpenAlexWork, BackfillResult } from '../types.js'
-import { getWorkByOpenalexId, getWorkByDoi, searchWorkByTitle } from '../utils/openalex.js'
-import { parseYamlFrontmatter, updateFrontmatter } from '../utils/yaml.js'
-import { normalizeDoi } from '../utils/doi.js'
-import { formatAuthorName, extractOrcidId } from '../utils/formatters.js'
-import { tokenize, jaccardSimilarity, authorOverlap } from '../utils/deduplication.js'
+import type { ExistingPublication, OpenAlexWork, BackfillResult } from '../types'
+import { getWorkByOpenalexId, getWorkByDoi, searchWorkByTitle } from '../utils/openalex'
+import { parseYamlFrontmatter, updateFrontmatter } from '../utils/yaml'
+import { normalizeDoi } from '../utils/doi'
+import { formatAuthorName, extractOrcidId } from '../utils/formatters'
+import { tokenize, jaccardSimilarity, authorOverlap } from '../utils/deduplication'
 
 const TITLE_SIM_THRESHOLD = 0.85
 const AUTHOR_OVERLAP_THRESHOLD = 0.5

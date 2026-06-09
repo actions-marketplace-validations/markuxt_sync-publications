@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { readFileSync, unlinkSync, existsSync } from 'fs'
 import { join } from 'path'
-import { initGitHubOutput, setOutput, _resetGitHubOutputPath } from '../../src/utils/github.js'
+import { initGitHubOutput, setOutput, _resetGitHubOutputPath } from '../../src/utils/github'
 import { tmpdir } from 'os'
 
 let outPath: string

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { filterDuplicates, deduplicatePending } from '../../src/workers/deduplicator.js'
-import type { PendingPublication, ExistingPublication } from '../../src/types.js'
+import { filterDuplicates, deduplicatePending } from '../../src/workers/deduplicator'
+import type { PendingPublication, ExistingPublication } from '../../src/types'
 
 function makePub(overrides: Partial<PendingPublication>): PendingPublication {
   return {

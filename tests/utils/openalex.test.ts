@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
-import { oaFetch, getInstitutionId, getAuthorId, getWorksForAuthor } from '../../src/utils/openalex.js'
+import { oaFetch, getInstitutionId, getAuthorId, getWorksForAuthor } from '../../src/utils/openalex'
 
 describe('openalex', () => {
   const realFetch = globalThis.fetch

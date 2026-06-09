@@ -7,8 +7,8 @@
  *   #14 — getWorksForAuthor returns OpenAlexWork[] (typed, not unknown[]).
  */
 
-import type { OpenAlexResponse, OpenAlexWork } from '../types.js'
-import { fetchWithRetry } from './http.js'
+import type { OpenAlexResponse, OpenAlexWork } from '../types'
+import { fetchWithRetry } from './http'
 
 const OPENALEX_BASE = 'https://api.openalex.org'
 

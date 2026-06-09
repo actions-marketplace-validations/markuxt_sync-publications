@@ -51,7 +51,7 @@ cp .env.example .env.development
 pnpm dev          # run via tsx (no build needed)
 # or:
 ./scripts/test-local.sh           # recommended — equivalent to pnpm dev
-./scripts/test-local.sh --build   # run the compiled dist/index.cjs
+./scripts/test-local.sh --build   # run the compiled dist/index.js
 ```
 
 You can also override any environment variable on the command line:
@@ -256,13 +256,13 @@ sync-publications/
 ```bash
 pnpm install             # install dependencies
 pnpm dev                 # run via tsx (no build needed)
-pnpm build               # bundle to a single self-contained dist/index.cjs (esbuild, all deps inlined)
-pnpm start               # run the compiled dist/index.cjs
+pnpm build               # bundle to a single self-contained dist/index.js (tsup, all deps inlined)
+pnpm start               # run the compiled dist/index.js
 pnpm test                # run the vitest suite
 pnpm test:watch          # interactive watch mode
 pnpm test:coverage       # vitest + v8 coverage
 ./scripts/test-local.sh          # equivalent to pnpm dev, auto-loads .env.development
-./scripts/test-local.sh --build  # same, but runs dist/index.cjs
+./scripts/test-local.sh --build  # same, but runs dist/index.js
 ```
 
 ### Environment variable files
@@ -278,9 +278,9 @@ command line overrides the value in `.env.development`.
 ### Build & release
 
 `dist/` is intentionally committed. `pnpm build` uses
-[esbuild](https://esbuild.github.io) to bundle `src/index.ts` together with all
+[tsup](https://tsup.egoist.dev) to bundle `src/index.ts` together with all
 dependencies (`dotenv` / `glob` / `unpdf` / `yaml`) into a **single
-self-contained `dist/index.cjs`**. GitHub Actions' node24 runtime loads it
+self-contained `dist/index.js`**. GitHub Actions' node24 runtime loads it
 directly (see `action.yml`) and **does not need `node_modules`** at runtime.
 Because of this, any PR that changes `src/` must rebuild `dist/` before merge.
 

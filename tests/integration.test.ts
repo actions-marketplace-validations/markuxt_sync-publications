@@ -16,14 +16,14 @@ import { tmpdir } from 'os'
 // we re-implement the orchestration against the real modules and assert on
 // the resulting markdown files. This is the standard pattern for testing
 // "main()" pipelines that read process.env at import time.
-import { parseWork } from '../src/workers/parser.js'
-import { filterDuplicates, deduplicatePending } from '../src/workers/deduplicator.js'
-import { scanExistingPublications } from '../src/scanners/publications.js'
-import { scanMembersWithOrcid } from '../src/scanners/members.js'
-import { normalizeDoi } from '../src/utils/doi.js'
-import { yamlStr } from '../src/utils/yaml.js'
+import { parseWork } from '../src/workers/parser'
+import { filterDuplicates, deduplicatePending } from '../src/workers/deduplicator'
+import { scanExistingPublications } from '../src/scanners/publications'
+import { scanMembersWithOrcid } from '../src/scanners/members'
+import { normalizeDoi } from '../src/utils/doi'
+import { yamlStr } from '../src/utils/yaml'
 
-import type { PendingPublication } from '../src/types.js'
+import type { PendingPublication } from '../src/types'
 
 function buildMarkdown(pub: PendingPublication): string {
   const lines: string[] = ['---', `_hidden: ${pub.hidden}`]
@@ -256,7 +256,7 @@ describe('integration: full sync pipeline (mocked network)', () => {
     })
 
     const { getInstitutionId, getAuthorId, getWorksForAuthor } =
-      await import('../src/utils/openalex.js')
+      await import('../src/utils/openalex')
 
     const institutionId = await getInstitutionId('https://ror.org/03y4dt428', 'me@example.com')
     expect(institutionId).toBe('I1')

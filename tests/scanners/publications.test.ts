@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { mkdirSync, writeFileSync, rmSync } from 'fs'
 import { join } from 'path'
 import { tmpdir } from 'os'
-import { scanExistingPublications } from '../../src/scanners/publications.js'
+import { scanExistingPublications } from '../../src/scanners/publications'
 
 let dir: string
 

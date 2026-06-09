@@ -6,11 +6,11 @@
  * in `openalex.ts`).
  */
 
-import type { PendingPublication, OpenAlexWork } from '../types.js'
-import { formatAuthorName, extractOrcidId } from '../utils/formatters.js'
-import { reconstructAbstract } from '../utils/abstract.js'
-import { doiToUrl } from '../utils/doi.js'
-import { pickPdfUrl } from '../utils/pdf.js'
+import type { PendingPublication, OpenAlexWork } from '../types'
+import { formatAuthorName, extractOrcidId } from '../utils/formatters'
+import { reconstructAbstract } from '../utils/abstract'
+import { doiToUrl } from '../utils/doi'
+import { pickPdfUrl } from '../utils/pdf'
 
 /**
  * Parse an OpenAlex work object into our internal publication format.

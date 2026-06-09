@@ -5,10 +5,10 @@
  */
 
 import { readFileSync } from 'fs'
-import { parseYamlFrontmatter } from '../utils/yaml.js'
-import { findMarkdownFiles } from '../utils/glob.js'
-import { normalizeDoi } from '../utils/doi.js'
-import type { ExistingPublication } from '../types.js'
+import { parseYamlFrontmatter } from '../utils/yaml'
+import { findMarkdownFiles } from '../utils/glob'
+import { normalizeDoi } from '../utils/doi'
+import type { ExistingPublication } from '../types'
 
 /**
  * Scan all existing publications and extract metadata for deduplication.

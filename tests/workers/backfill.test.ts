@@ -6,9 +6,9 @@ import {
   buildAuthorsOrcid,
   backfillPublication,
   backfillExisting
-} from '../../src/workers/backfill.js'
-import { parseYamlFrontmatter } from '../../src/utils/yaml.js'
-import type { ExistingPublication, OpenAlexWork } from '../../src/types.js'
+} from '../../src/workers/backfill'
+import { parseYamlFrontmatter } from '../../src/utils/yaml'
+import type { ExistingPublication, OpenAlexWork } from '../../src/types'
 
 const realFetch = globalThis.fetch
 
